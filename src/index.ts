@@ -2,19 +2,26 @@ import express from "express";
 import { config } from "dotenv";
 import { MongoGetUsersRepository } from "./repositories/getUsers/mongoGetUsers";
 import { GetUsersController } from "./controller/getUsers/getUsers";
+import { MongoClient } from "./databse/mongo";
 
-config();
+const main = async () => {
+  config();
 
-const app = express();
+  const app = express();
 
-const port = process.env.PORT || 8000;
+  await MongoClient.connect();
 
-app.get("/users", async (req, res) => {
-  const mongoGetUsersRepository = new MongoGetUsersRepository();
-  const getUsersController = new GetUsersController(mongoGetUsersRepository);
-  const { body, statusCode } = await getUsersController.handle();
+  const port = process.env.PORT || 8000;
 
-  res.send(body).status(statusCode);
-});
+  app.get("/users", async (req, res) => {
+    const mongoGetUsersRepository = new MongoGetUsersRepository();
+    const getUsersController = new GetUsersController(mongoGetUsersRepository);
+    const { body, statusCode } = await getUsersController.handle();
 
-app.listen(port, () => console.log(`listening on port ${port}`));
+    res.send(body).status(statusCode);
+  });
+
+  app.listen(port, () => console.log(`listening on port ${port}`));
+};
+
+main();
